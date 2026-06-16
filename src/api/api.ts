@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type {Post} from '../types/Post';
-import type {ApiResponse} from '../types/ApiResponse';
+import type { PaginatedResponse } from '../types/PaginatedResponse';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -36,50 +36,60 @@ function hideError() {
     // ... (Afegeix la classe 'hidden' a errorElement)
 }
 
-// Funció principal per obtenir dades (a implementar)
-async function fetchData() {
-    const searchTerm = /* ... (Obtén el valor de searchInput) */;
-    const useAxios = /* ... (Comprova si apiSelector.value és 'axios') */;
+export async function fetchData(): Promise<void> {
+    const searchTerm = (document.getElementById('searchInput') as HTMLInputElement).value;
+    const apiSelector = document.getElementById('apiSelector') as HTMLSelectElement;
+    const useAxios = apiSelector.value === 'axios';
 
-    const response = await axios.get(API_URL, {
-        timeout: 5000, // 5 seconds
-    });
-    
     showLoading();
     hideError();
-    // ... (Neteja resultats anteriors i paginació anterior)
 
     try {
         if (useAxios) {
-            // ... (Crida la funció per obtenir dades amb Axios)
+            // We expect an object with { items: Post[], totalItems: number }
+            const { items, totalItems } = await fetchDataWithAxios(searchTerm);
+            displayResults(items, totalItems);
         } else {
-            // ... (Crida la funció per obtenir dades amb Fetch)
+            // Assuming your fetch logic returns the same structure
+            const { items, totalItems } = await fetchDataWithFetch(searchTerm);
+            displayResults(items, totalItems);
         }
     } catch (error) {
-        // ... (Gestiona errors inesperats si s'escapen de les funcions específiques de Fetch/Axios)
+        showError("Failed to fetch data. Please try again.");
+        console.error(error);
     } finally {
         hideLoading();
     }
 }
 
 // Funció per a la visualització dels resultats i la paginació (a implementar)
-function displayResults(items, totalItems) {
-    // ... (Implementa la lògica per mostrar cada "ítem" com una targeta i per cridar setupPagination)
+function displayResults(items: Post[], totalItems: number): void {
+    // ... logic to render cards
 }
 
 function setupPagination(totalItems) {
     // ... (Implementa la lògica per crear els botons de paginació)
 }
 
-// Funció per obtenir dades amb Fetch (a implementar)
-async function fetchDataWithFetch(searchTerm) {
-    // ... (Implementa la petició amb Fetch API)
+async function fetchDataWithFetch(searchTerm: string, url: string = API_URL): Promise<PaginatedResponse> {
+    // Construct the URL with query parameters
+    const fetchUrl = new URL(url);
+    fetchUrl.searchParams.append('q', searchTerm);
+
+    const response = await fetch(fetchUrl.toString());
+
+    if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+    }
+
+    const data: PaginatedResponse = await response.json();
+    return data;
 }
 
 
                                                                                     
-export async function fetchDataWithAxios(searchTerm: string): Promise<ApiResponse> {
-    const response = await axios.get<ApiResponse>(API_URL, {
+async function fetchDataWithAxios(searchTerm: string): Promise<PaginatedResponse> {
+    const response = await axios.get<PaginatedResponse>(API_URL, {
         params: { q: searchTerm }
     });
     return response.data;
