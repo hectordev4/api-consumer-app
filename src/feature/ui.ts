@@ -1,9 +1,5 @@
 import type {Post} from '../types/Post';
-
-const resultsContainer = document.getElementById('resultsContainer') as HTMLDivElement;
-const paginationContainer = document.getElementById('paginationContainer') as HTMLDivElement;
-const loadingElement = document.getElementById('loadingElement') as HTMLDivElement;
-const errorElement = document.getElementById('errorElement') as HTMLDivElement;
+import { createPostCard } from '../components/PostCard';
 
 let currentPage = 1;
 const itemsPerPage = 10; // Quants ítems per pàgina vols mostrar
@@ -11,32 +7,33 @@ const itemsPerPage = 10; // Quants ítems per pàgina vols mostrar
 // Referències als elements del DOM:
 // apiSelector, searchInput, fetchButton, loadingElement, errorElement, resultsContainer, paginationContainer
 // ... (Obtén les referències amb document.getElementById)
-
-// Event Listener per al botó "Obtenir Dades"
-// ... (Afegeix l'event listener al fetchButton per cridar fetchData)
+const resultsContainer = document.getElementById('resultsContainer') as HTMLDivElement;
+const paginationContainer = document.getElementById('paginationContainer') as HTMLDivElement;
+const loadingElement = document.getElementById('loadingElement') as HTMLDivElement;
+const errorElement = document.getElementById('errorElement') as HTMLDivElement;
 
 // Funció per mostrar l'indicador de càrrega
-export function showLoading() {
-    // ... (Elimina la classe 'hidden' de loadingElement)
+export function showLoading(): void {
+    loadingElement.classList.remove('hidden');
 }
 
 // Funció per amagar l'indicador de càrrega
-export function hideLoading() {
-    // ... (Afegeix la classe 'hidden' a loadingElement)
+export function hideLoading(): void {
+    loadingElement.classList.add('hidden');
 }
 
 // Funció per mostrar missatges d'error
-export function showError(message) {
-    // ... (Actualitza el text de errorElement i elimina la classe 'hidden')
+export function showError(message: string): void {
+    errorElement.textContent = message;
+    errorElement.classList.remove('hidden');
 }
 
 // Funció per amagar missatges d'error
-export function hideError() {
-    // ... (Afegeix la classe 'hidden' a errorElement)
+export function hideError(): void {
+    errorElement.classList.add('hidden');
 }
 
 export function displayResults(items: Post[], totalItems: number): void {
-    // Clear previous results
     resultsContainer.innerHTML = '';
 
     if (items.length === 0) {
@@ -44,22 +41,16 @@ export function displayResults(items: Post[], totalItems: number): void {
         return;
     }
 
-    // Create cards
+    // Injecting the component into the lifecycle
     items.forEach(post => {
-        const card = document.createElement('div');
-        card.className = 'post-card'; // Add CSS class for styling
-        card.innerHTML = `
-            <h3>${post.title}</h3>
-            <p>${post.body}</p>
-        `;
-        resultsContainer.appendChild(card);
+        const cardElement = createPostCard(post);
+        resultsContainer.appendChild(cardElement);
     });
 
-    // Update pagination buttons
     setupPagination(totalItems);
 }
 
-export function setupPagination(totalItems: number) {
+export function setupPagination(totalItems: number): void {
     paginationContainer.innerHTML = '';
     const totalPages = Math.ceil(totalItems / itemsPerPage);
 
