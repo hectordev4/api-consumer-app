@@ -2,17 +2,28 @@ import axios from 'axios';
 import type { PaginatedResponse } from '../types/PaginatedResponse';
 import { showLoading, hideLoading, showError, hideError, displayResults } from '../feature/ui';
 
+export let currentPage: number = 1;
+export const itemsPerPage: number = 10;
+
+// Add this setter function
+export function setCurrentPage(newPage: number): void {
+    currentPage = newPage;
+}
+export function getCurrentPage(): number {
+    return currentPage;
+}
+
 const API_URL: string = import.meta.env.VITE_API_URL;
 
-export async function fetchData(): Promise<void> {
+// Add page parameter with a default value of 1
+export async function fetchData(page: number = 1): Promise<void> {
+    currentPage = page;
     const searchTerm = (document.getElementById('searchInput') as HTMLInputElement).value;
     const apiSelector = document.getElementById('apiSelector') as HTMLSelectElement;
     const customApiInput = document.getElementById('customApiUrl') as HTMLInputElement;
 
     const useAxios = apiSelector.value === 'axios';
     
-    // Logic: If 'fetch' is selected AND the input has a value, use that value.
-    // Otherwise, fall back to the VITE_API_URL.
     const targetUrl = (apiSelector.value === 'fetch' && customApiInput.value) 
         ? customApiInput.value 
         : API_URL;
@@ -22,8 +33,8 @@ export async function fetchData(): Promise<void> {
 
     try {
         const responseData = useAxios 
-            ? await fetchDataWithAxios(searchTerm, targetUrl) 
-            : await fetchDataWithFetch(searchTerm, targetUrl);
+            ? await fetchDataWithAxios(searchTerm, targetUrl, currentPage) 
+            : await fetchDataWithFetch(searchTerm, targetUrl, currentPage);
 
         displayResults(responseData.items, responseData.totalItems);
     } catch (error) {
@@ -34,34 +45,49 @@ export async function fetchData(): Promise<void> {
     }
 }
 
-async function fetchDataWithFetch(searchTerm: string, url: string): Promise<PaginatedResponse> {
+async function fetchDataWithFetch(searchTerm: string, url: string, page: number): Promise<PaginatedResponse> {
     const fetchUrl = new URL(url);
-    fetchUrl.searchParams.append('/', searchTerm);
+    fetchUrl.searchParams.append('q', searchTerm);
+    fetchUrl.searchParams.append('_page', page.toString());
+    fetchUrl.searchParams.append('_limit', itemsPerPage.toString());
 
     const response = await fetch(fetchUrl.toString());
     if (!response.ok) throw new Error(`Error: ${response.statusText}`);
 
-    const data = await response.json();
+    const rawData = await response.json();
     
-    // Simplest version: Just return the data and let the UI handle the mapping.
-    // We ensure 'items' is an array.
-    return {
-        items: Array.isArray(data) ? data : (data.items || [data]),
-        totalItems: data.length || 1
-    };
-}
-                                                                                    
-async function fetchDataWithAxios(searchTerm: string, url: string): Promise<PaginatedResponse> {
-    const response = await axios.get(url, { params: { q: searchTerm } });
-    const data = response.data;
-    
-    // Standardize: Same logic as above
-    const items = Array.isArray(data) ? data : (data.items || data.results || []);
+    // Extract total count from headers
+    const totalCountHeader = response.headers.get('x-total-count');
+    const totalItems = totalCountHeader ? parseInt(totalCountHeader, 10) : rawData.length;
 
-    console.log("Normalized Items:", items);
+    const items = Array.isArray(rawData) ? rawData : (rawData.results || rawData.items || [rawData]);
     
     return {
         items: items,
-        totalItems: data.totalItems || items.length
+        totalItems: totalItems
+    };
+}
+                                                                                    
+async function fetchDataWithAxios(searchTerm: string, url: string, page: number): Promise<PaginatedResponse> {
+    const response = await axios.get(url, { 
+        params: { 
+            q: searchTerm,
+            _page: page,
+            _limit: itemsPerPage
+        } 
+    });
+    
+    const rawData = response.data;
+    
+    // Extract total count from axios headers
+    // Note: Axios headers are lowercase by default
+    const totalCountHeader = response.headers['x-total-count'];
+    const totalItems = totalCountHeader ? parseInt(totalCountHeader, 10) : rawData.length;
+    
+    const items = Array.isArray(rawData) ? rawData : (rawData.results || rawData.items || [rawData]);
+    
+    return {
+        items: items,
+        totalItems: totalItems
     };
 }

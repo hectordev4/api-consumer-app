@@ -1,71 +1,76 @@
-import type {Post} from '../types/Post';
+import type { Post } from '../types/Post';
 import { createPostCard } from '../components/PostCard';
+import { fetchData, setCurrentPage, getCurrentPage, itemsPerPage } from '../api/api';
 
-let currentPage = 1;
-const itemsPerPage = 10; // Quants ítems per pàgina vols mostrar
-
-// Referències als elements del DOM:
-// apiSelector, searchInput, fetchButton, loadingElement, errorElement, resultsContainer, paginationContainer
-// ... (Obtén les referències amb document.getElementById)
+// DOM References
 const resultsContainer = document.getElementById('resultsContainer') as HTMLDivElement;
 const paginationContainer = document.getElementById('paginationContainer') as HTMLDivElement;
 const loadingElement = document.getElementById('loadingElement') as HTMLDivElement;
 const errorElement = document.getElementById('errorElement') as HTMLDivElement;
 
-// Funció per mostrar l'indicador de càrrega
+// UI State Management Helpers
 export function showLoading(): void {
     loadingElement.classList.remove('hidden');
 }
 
-// Funció per amagar l'indicador de càrrega
 export function hideLoading(): void {
     loadingElement.classList.add('hidden');
 }
 
-// Funció per mostrar missatges d'error
 export function showError(message: string): void {
     errorElement.textContent = message;
     errorElement.classList.remove('hidden');
 }
 
-// Funció per amagar missatges d'error
 export function hideError(): void {
     errorElement.classList.add('hidden');
 }
 
+// Display Logic
 export function displayResults(items: any[], totalItems: number): void {
-    const resultsContainer = document.getElementById('resultsContainer') as HTMLDivElement;
     resultsContainer.innerHTML = '';
 
+    if (!items || items.length === 0) {
+        resultsContainer.innerHTML = '<p>No results found.</p>';
+        paginationContainer.innerHTML = ''; // Clear pagination on empty results
+        return;
+    }
+
     items.forEach((item: any) => {
-        // Here is the bridge: Transform any API object into a clean 'Post'
+        // Data Adapter: Bridge between API structure and Post interface
         const post: Post = {
             id: item.id,
             title: item.title || item.name || 'Untitled',
             body: item.body || item.email || item.username || 'No content'
         };
 
-        // Now your card component stays 100% clean and typed
         const cardElement = createPostCard(post);
         resultsContainer.appendChild(cardElement);
     });
     
+    // Pass the total items received from API headers to refresh pagination
     setupPagination(totalItems);
 }
 
+// Pagination Logic
 export function setupPagination(totalItems: number): void {
     paginationContainer.innerHTML = '';
     const totalPages = Math.ceil(totalItems / itemsPerPage);
 
+    // Only render buttons if there's more than one page
+    if (totalPages <= 1) return;
+
     for (let i = 1; i <= totalPages; i++) {
         const btn = document.createElement('button');
         btn.innerText = i.toString();
-        btn.className = i === currentPage ? 'active' : '';
+        
+        // Highlight active page using getter to ensure sync
+        btn.className = (i === getCurrentPage()) ? 'active' : 'page-btn';
         
         btn.addEventListener('click', () => {
-            currentPage = i;
-            // You will need to call your main fetchData() here
-            // Note: You might need to make sure fetchData() accepts a page parameter
+            // Update shared state and trigger new fetch
+            setCurrentPage(i);
+            fetchData(i);
         });
         
         paginationContainer.appendChild(btn);
