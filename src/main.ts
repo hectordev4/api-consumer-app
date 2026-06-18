@@ -1,11 +1,30 @@
-import { fetchData } from './api/api';
+import { fetchData } from './api/api'; // Adjust the path as needed
+import './style.css';
 
-
-// Event Listener per al botó "Obtenir Dades"
-// ... (Afegeix l'event listener al fetchButton per cridar fetchData)
+// 1. Grab the DOM elements
 const fetchButton = document.getElementById('fetchButton') as HTMLButtonElement;
 
-// Simply attach the event listener directly
+// 2. Attach the click event
 fetchButton.addEventListener('click', () => {
     fetchData();
+});
+
+// Optional: Allow "Enter" key in the search input to trigger the fetch
+const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        fetchData();
+    }
+});
+
+const apiSelector = document.getElementById('apiSelector') as HTMLSelectElement;
+const customInput = document.getElementById('customApiUrl') as HTMLDivElement;
+
+apiSelector.addEventListener('change', () => {
+    // Show input only if 'fetch' is selected
+    if (apiSelector.value === 'fetch') {
+        customInput.classList.remove('hidden');
+    } else {
+        customInput.classList.add('hidden');
+    }
 });

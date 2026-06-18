@@ -33,20 +33,23 @@ export function hideError(): void {
     errorElement.classList.add('hidden');
 }
 
-export function displayResults(items: Post[], totalItems: number): void {
+export function displayResults(items: any[], totalItems: number): void {
+    const resultsContainer = document.getElementById('resultsContainer') as HTMLDivElement;
     resultsContainer.innerHTML = '';
 
-    if (items.length === 0) {
-        resultsContainer.innerHTML = '<p>No results found.</p>';
-        return;
-    }
+    items.forEach((item: any) => {
+        // Here is the bridge: Transform any API object into a clean 'Post'
+        const post: Post = {
+            id: item.id,
+            title: item.title || item.name || 'Untitled',
+            body: item.body || item.email || item.username || 'No content'
+        };
 
-    // Injecting the component into the lifecycle
-    items.forEach(post => {
+        // Now your card component stays 100% clean and typed
         const cardElement = createPostCard(post);
         resultsContainer.appendChild(cardElement);
     });
-
+    
     setupPagination(totalItems);
 }
 

@@ -4,28 +4,36 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style src="/src/style.css"></style>
+    <link rel="stylesheet" href="style.css">
     <title>API-Consumer-HectorValverde</title>
   </head>
   <body>
     <header>
-        <h1>API-Consumer</h1>
-        <nav id="nav">
-            <select id="apiSelector">
-                <option value="axios">Axios</option>
-                <option value="fetch">Fetch</option>
-            </select>
-            <input type="text" id="searchInput" placeholder="Cerca un post...">
-            <button id="fetchButton">Obtenir Dades</button>
-        </nav>
+      <h1>API-Consumer</h1>
+      <nav id="nav">
+        <select id="apiSelector">
+            <option value="axios">Axios</option>
+            <option value="fetch">Fetch</option>
+        </select>
+        
+        <input 
+            type="text" 
+            id="customApiUrl" 
+            class="hidden" 
+            placeholder="Enter custom API URL (optional)..."
+        >
+        
+        <input type="text" id="searchInput" placeholder="Cerca un post...">
+        <button id="fetchButton">Obtenir Dades</button>
+      </nav>
     </header>
     <main id="app">
-        <div id="loadingElement" class="hidden">Carregant...</div>
-        <div id="errorElement" class="hidden" style="color: red;"></div>
+      <div id="loadingElement" class="hidden">Carregant...</div>
+      <div id="errorElement" class="hidden" style="color: red;"></div>
 
-        <div id="resultsContainer"></div>
-        
-        <div id="paginationContainer"></div>
+      <div id="resultsContainer"></div>
+      
+      <div id="paginationContainer"></div>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
