@@ -1,76 +1,30 @@
+import { fetchData } from './api/api'; // Adjust the path as needed
+import './style.css';
 
+// 1. Grab the DOM elements
+const fetchButton = document.getElementById('fetchButton') as HTMLButtonElement;
 
-/* 
-const API_URL = 'https://jsonplaceholder.typicode.com/posts';
-let currentPage = 1;
-const itemsPerPage = 10; // Quants ítems per pàgina vols mostrar
+// 2. Attach the click event
+fetchButton.addEventListener('click', () => {
+    fetchData();
+});
 
-// Referències als elements del DOM:
-// apiSelector, searchInput, fetchButton, loadingElement, errorElement, resultsContainer, paginationContainer
-// ... (Obtén les referències amb document.getElementById)
-
-// Event Listener per al botó "Obtenir Dades"
-// ... (Afegeix l'event listener al fetchButton per cridar fetchData)
-
-// Funció per mostrar l'indicador de càrrega
-function showLoading() {
-    // ... (Elimina la classe 'hidden' de loadingElement)
-}
-
-// Funció per amagar l'indicador de càrrega
-function hideLoading() {
-    // ... (Afegeix la classe 'hidden' a loadingElement)
-}
-
-// Funció per mostrar missatges d'error
-function showError(message) {
-    // ... (Actualitza el text de errorElement i elimina la classe 'hidden')
-}
-
-// Funció per amagar missatges d'error
-function hideError() {
-    // ... (Afegeix la classe 'hidden' a errorElement)
-}
-
-// Funció principal per obtenir dades (a implementar)
-async function fetchData() {
-    const searchTerm = // ... (Obtén el valor de searchInput);
-    const useAxios = //... (Comprova si apiSelector.value és 'axios');
-    
-    showLoading();
-    hideError();
-    // ... (Neteja resultats anteriors i paginació anterior)
-
-    try {
-        if (useAxios) {
-            // ... (Crida la funció per obtenir dades amb Axios)
-        } else {
-            // ... (Crida la funció per obtenir dades amb Fetch)
-        }
-    } catch (error) {
-        // ... (Gestiona errors inesperats si s'escapen de les funcions específiques de Fetch/Axios)
-    } finally {
-        hideLoading();
+// Optional: Allow "Enter" key in the search input to trigger the fetch
+const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        fetchData();
     }
-}
+});
 
-// Funció per a la visualització dels resultats i la paginació (a implementar)
-function displayResults(items, totalItems) {
-    // ... (Implementa la lògica per mostrar cada "ítem" com una targeta i per cridar setupPagination)
-}
+const apiSelector = document.getElementById('apiSelector') as HTMLSelectElement;
+const customInput = document.getElementById('customApiUrl') as HTMLDivElement;
 
-function setupPagination(totalItems) {
-    // ... (Implementa la lògica per crear els botons de paginació)
-}
-
-// Funció per obtenir dades amb Fetch (a implementar)
-async function fetchDataWithFetch(searchTerm) {
-    // ... (Implementa la petició amb Fetch API)
-}
-
-// Funció per obtenir dades amb Axios (a implementar)
-                                                                                    
-async function fetchDataWithAxios(searchTerm) {
-    // ... (Implementa la petició amb Axios)
-
-*/
+apiSelector.addEventListener('change', () => {
+    // Show input only if 'fetch' is selected
+    if (apiSelector.value === 'fetch') {
+        customInput.classList.remove('hidden');
+    } else {
+        customInput.classList.add('hidden');
+    }
+});

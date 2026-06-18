@@ -4,14 +4,49 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css">
     <title>API-Consumer-HectorValverde</title>
   </head>
   <body>
-    <head>
+    <header>
       <h1>API-Consumer</h1>
-      <nav id="nav"></nav>
-    </head>
-    <main id="app"></main>
+      <nav id="nav" role="search" aria-label="Main Search">
+        <label for="apiSelector" class="sr-only">Choose HTTP Client</label>
+        <select id="apiSelector" aria-label="Select API Client">
+            <option value="axios">Axios</option>
+            <option value="fetch">Fetch</option>
+        </select>
+        
+        <label for="customApiUrl" class="sr-only">Custom API URL</label>
+        <input 
+            type="text" 
+            id="customApiUrl" 
+            class="hidden" 
+            placeholder="Enter custom API URL (optional)..."
+            aria-label="Enter custom API URL"
+        >
+        
+        <label for="searchInput" class="sr-only">Search Posts</label>
+        <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Cerca un post..."
+            aria-label="Search posts by keyword"
+        >
+        
+        <button id="fetchButton" aria-label="Fetch data from API">Obtenir Dades</button>
+      </nav>
+    </header>
+
+    <main id="app">
+      <div id="loadingElement" class="hidden" role="status" aria-live="polite">Carregant...</div>
+      <div id="errorElement" class="hidden" role="alert" style="color: red;"></div>
+
+      <section id="resultsContainer" aria-label="Search results"></section>
+      
+      <nav id="paginationContainer" aria-label="Pagination Navigation"></nav>
+    </main>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
